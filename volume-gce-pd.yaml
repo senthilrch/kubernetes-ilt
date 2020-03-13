@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: gcepd-pod
+spec:
+  # Volumes are declared by the pod. They share its lifecycle
+  # and are communal across containers.
+  volumes:
+  - name: gcepd-volume
+    # This GCE PD must already exist.
+    gcePersistentDisk:
+      pdName: my-data-disk
+      fsType: ext4
+
+  # Now, one of our containers can mount this volume and use it like
+  # any other directory.
+  containers:
+    - name: my-container
+      volumeMounts:
+        - name: gcepd-volume # This is the name of the volume we set at the pod level
+          mountPath: /var/simple # Where to mount this directory in our container
+      
+      # Now that we have a directory mounted at /var/simple, let's 
+      # write to a file inside it!
+      image: alpine
+      command: ["/bin/sh"]
+      args: ["-c", "while true; do date >> /var/simple/file.txt; sleep 5; done"]
+    
